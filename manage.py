@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from flask.ext.script import Manager
-from app import app
+from app import app, db
 
 manager = Manager(app)
 
@@ -11,7 +11,7 @@ def make_shell_context():
 		in the context of the app
 	"""
 
-	return dict(app=app)
+	return dict(app=app, db=db)
 
 if __name__ == '__main__':
 	manager.run()
