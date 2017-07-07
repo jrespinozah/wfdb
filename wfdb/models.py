@@ -1,17 +1,6 @@
-from flask import Flask, render_template
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask_wtf import Form
-from wtforms import TextAreaField
-from wtforms import validators
-import datetime
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'XMLZODSHE8N6NFOZDPZA2HULWSIYJU45K6N4ZO9M'
-app.config['DEBUG'] = None
-
-db = SQLAlchemy(app)
+db = SQLAlchemy()
 
 tags = db.Table(
     'post_tags',
@@ -110,60 +99,3 @@ class Comment(db.Model):
 
     def __repr__(self):
         return '<Comment {}>'.format(self.text[:15])
-
-
-class CommentForm(Form):
-    text = TextAreaField(u'Text', validators=[
-        validators.required(),
-        validators.Length(max=2000)
-    ])
-
-
-@app.route("/")
-def home():
-    latest_movies = Movie.query.order_by(
-        Movie.release_date.desc()
-    ).limit(5).all()
-
-    return render_template("index.html", latest_movies=latest_movies)
-
-@app.route("/actor/<int:actor_id>")
-def actor(actor_id):
-    actor = Actor.query.get_or_404(actor_id)
-
-    return render_template("actor.html", actor=actor)
-
-
-@app.route("/movie/<int:movie_id>")
-def movie(movie_id):
-    movie = Movie.query.get_or_404(movie_id)
-
-    return render_template("movie.html", movie=movie)
-
-
-@app.route("/blog")
-def blog():
-    posts = Post.query.order_by(Post.publish_date.desc()).all()
-
-    return render_template("blog.html", posts=posts)
-
-
-@app.route("/blog/<int:post_id>", methods=["GET", "POST"])
-def post(post_id):
-    post = Post.query.get_or_404(post_id)
-    
-    form = CommentForm()
-    if form.validate_on_submit():
-        comment = Comment()
-        comment.text = form.text.data
-        comment.date = datetime.datetime.now()
-        comment.post = post
-        comment.user = User.query.get(1)
-
-        db.session.add(comment)
-        db.session.commit()
-
-    return render_template("post.html", post=post, form=form)
-
-if __name__ == "__main__":
-    app.run(debug=True)

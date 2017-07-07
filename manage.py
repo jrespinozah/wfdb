@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
 from flask.ext.script import Manager
-from app import app, db
+from wfdb import create_app
+from wfdb.models import db
+
+app = create_app('wfdb.config.DevConfig')
 
 manager = Manager(app)
 
